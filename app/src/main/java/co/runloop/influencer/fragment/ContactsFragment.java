@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import co.runloop.influencer.R;
+import co.runloop.influencer.adapter.ContactsAdapter;
 
 public class ContactsFragment extends BaseFragment {
 
@@ -26,10 +27,12 @@ public class ContactsFragment extends BaseFragment {
     }
 
     private RecyclerView recyclerView;
+    private ContactsAdapter adapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        adapter = new ContactsAdapter();
         getAppCompatActivity().getSupportActionBar().setTitle(R.string.contacts);
     }
 
@@ -42,6 +45,7 @@ public class ContactsFragment extends BaseFragment {
 
         recyclerView = root.findViewById(R.id.frag_contacts_list_recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setAdapter(adapter);
 
         return root;
     }
