@@ -2,7 +2,9 @@ package co.runloop.influencer.data;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
@@ -14,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 import co.runloop.influencer.model.Contact;
+import co.runloop.influencer.utils.SimpleObserver;
 
 public class ContactsProvider {
 
@@ -31,6 +34,7 @@ public class ContactsProvider {
     };
 
     private Context context;
+    private ContentObserver contentObserver;
 
     public ContactsProvider(Context context) {
         this.context = context;
@@ -53,6 +57,33 @@ public class ContactsProvider {
             }
         }
         return null;
+    }
+
+    public void registerContactsChangesObserver(SimpleObserver observer) {
+        contentObserver = new ContentObserver(null) {
+            @Override
+            public boolean deliverSelfNotifications() {
+                return true;
+            }
+
+            @Override
+            public void onChange(boolean selfChange) {
+                onChange(selfChange, null);
+            }
+
+            @Override
+            public void onChange(boolean selfChange, Uri uri) {
+                observer.onChange();
+            }
+        };
+        context.getContentResolver().registerContentObserver(Contacts.CONTENT_URI,
+                true,
+                contentObserver);
+    }
+
+    public void unregisrerContactsChangesObserver() {
+        context.getContentResolver().unregisterContentObserver(contentObserver);
+        contentObserver = null;
     }
 
     public List<Contact> getAll() {
@@ -80,6 +111,7 @@ public class ContactsProvider {
     }
 
     public List<Contact> getByContainsName(String str) {
+        //TODO
         return Collections.emptyList();
     }
 }

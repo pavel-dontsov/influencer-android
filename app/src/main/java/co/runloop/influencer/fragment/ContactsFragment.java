@@ -1,6 +1,8 @@
 package co.runloop.influencer.fragment;
 
 import android.Manifest;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -15,9 +17,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.List;
+
 import co.runloop.influencer.R;
 import co.runloop.influencer.adapter.ContactsAdapter;
 import co.runloop.influencer.data.ContactsProvider;
+import co.runloop.influencer.model.Contact;
+import co.runloop.influencer.viewmodel.ContactsViewModel;
 
 public class ContactsFragment extends BaseFragment {
 
@@ -35,12 +41,15 @@ public class ContactsFragment extends BaseFragment {
 
     private RecyclerView recyclerView;
     private ContactsAdapter adapter;
+    private ContactsViewModel contactsViewModel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         adapter = new ContactsAdapter();
-        getAppCompatActivity().getSupportActionBar().setTitle(R.string.contacts);
+        if (isActionBarAvailable()) {
+            getBaseActivity().getSupportActionBar().setTitle(R.string.contacts);
+        }
     }
 
     @Nullable
@@ -54,8 +63,19 @@ public class ContactsFragment extends BaseFragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(adapter);
 
+        contactsViewModel = ViewModelProviders
+                .of(this)
+                .get(ContactsViewModel.class);
+
         if (contactsIsAvailable()) {
-            loadContacts();
+            contactsViewModel.getContacts().observe(this, (@Nullable List<Contact> contacts) -> {
+                adapter.setContacts(contacts);
+                adapter.notifyDataSetChanged();
+            });
+            if (!contactsViewModel.isWasLoaded()) {
+                contactsViewModel.loadAll();
+                contactsViewModel.setWasLoaded(true);
+            }
         }
 
         return root;
@@ -66,7 +86,7 @@ public class ContactsFragment extends BaseFragment {
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            loadContacts();
+            contactsViewModel.loadAll();
         } else {
             requestReadContactsPermission();
         }
@@ -77,15 +97,7 @@ public class ContactsFragment extends BaseFragment {
         super.onResume();
         if (!contactsIsAvailable()) {
             requestReadContactsPermission();
-        } else {
-            loadContacts();
         }
-    }
-
-    private void loadContacts() {
-        ContactsProvider contactsProvider = new ContactsProvider(getActivity());
-        adapter.setContacts(contactsProvider.getAll());
-        adapter.notifyDataSetChanged();
     }
 
     private boolean contactsIsAvailable() {
