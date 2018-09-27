@@ -66,15 +66,14 @@ public class ContactsFragment extends BaseFragment {
         contactsViewModel = ViewModelProviders
                 .of(this)
                 .get(ContactsViewModel.class);
-
+        contactsViewModel.getContacts().observe(this, (@Nullable List<Contact> contacts) -> {
+            adapter.setContacts(contacts);
+            adapter.notifyDataSetChanged();
+        });
         if (contactsIsAvailable()) {
-            contactsViewModel.getContacts().observe(this, (@Nullable List<Contact> contacts) -> {
-                adapter.setContacts(contacts);
-                adapter.notifyDataSetChanged();
-            });
-            if (!contactsViewModel.isWasLoaded()) {
+            contactsViewModel.onPermissionGranted();
+            if(contactsViewModel.getContacts().getValue() == null) {
                 contactsViewModel.loadAll();
-                contactsViewModel.setWasLoaded(true);
             }
         }
 
@@ -85,10 +84,9 @@ public class ContactsFragment extends BaseFragment {
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (contactsIsAvailable()) {
+            contactsViewModel.onPermissionGranted();
             contactsViewModel.loadAll();
-        } else {
-            requestReadContactsPermission();
         }
     }
 

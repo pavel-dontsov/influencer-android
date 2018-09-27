@@ -82,8 +82,10 @@ public class ContactsProvider {
     }
 
     public void unregisrerContactsChangesObserver() {
-        context.getContentResolver().unregisterContentObserver(contentObserver);
-        contentObserver = null;
+        if (contentObserver != null) {
+            context.getContentResolver().unregisterContentObserver(contentObserver);
+            contentObserver = null;
+        }
     }
 
     public List<Contact> getAll() {

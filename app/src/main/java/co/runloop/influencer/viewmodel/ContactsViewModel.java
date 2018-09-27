@@ -5,25 +5,32 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
+import android.util.Log;
 
 import java.util.List;
 
 import co.runloop.influencer.data.ContactsProvider;
 import co.runloop.influencer.model.Contact;
+import co.runloop.influencer.utils.SimpleObserver;
 
 public class ContactsViewModel extends AndroidViewModel {
 
     private MutableLiveData<List<Contact>> contacts;
     private ContactsProvider provider;
-    private boolean wasLoaded;
+    private SimpleObserver observer;
 
     public ContactsViewModel(Application app) {
         super(app);
         contacts = new MutableLiveData<>();
         provider = new ContactsProvider(app);
-        provider.registerContactsChangesObserver(() -> {
+        observer = () -> {
             loadAll();
-        });
+        };
+    }
+
+    public void onPermissionGranted() {
+        provider.unregisrerContactsChangesObserver();
+        provider.registerContactsChangesObserver(observer);
     }
 
     @Override
@@ -37,13 +44,5 @@ public class ContactsViewModel extends AndroidViewModel {
 
     public LiveData<List<Contact>> getContacts() {
         return contacts;
-    }
-
-    public boolean isWasLoaded() {
-        return wasLoaded;
-    }
-
-    public void setWasLoaded(boolean wasLoaded) {
-        this.wasLoaded = wasLoaded;
     }
 }
