@@ -2,8 +2,10 @@ package co.runloop.influencer.model;
 
 public class Contact {
 
+    private long id;
     private String name;
-    private String photoUrl;
+    private String thumbnailUri;
+    private String photoUri;
     private String phoneNumber;
 
     public Contact() {
@@ -14,16 +16,24 @@ public class Contact {
         return name;
     }
 
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
 
-    public String getPhotoUrl() {
-        return photoUrl;
+    public String getPhotoUri() {
+        return photoUri;
     }
 
-    public void setPhotoUrl(String photoUrl) {
-        this.photoUrl = photoUrl;
+    public void setPhotoUri(String photoUri) {
+        this.photoUri = photoUri;
     }
 
     public String getPhoneNumber() {
@@ -32,5 +42,13 @@ public class Contact {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getThumbnailUri() {
+        return thumbnailUri;
+    }
+
+    public void setThumbnailUri(String thumbnailUri) {
+        this.thumbnailUri = thumbnailUri;
     }
 }

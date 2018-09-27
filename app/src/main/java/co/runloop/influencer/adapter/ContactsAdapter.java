@@ -65,7 +65,7 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
         public void bind(Contact contact) {
             nameTv.setText(contact.getName());
             phoneNumberTv.setText(contact.getPhoneNumber());
-            if (contact.getPhotoUrl() != null) {
+            if (contact.getPhotoUri() != null) {
                 //TODO load img
             }
         }
