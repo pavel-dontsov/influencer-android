@@ -62,7 +62,7 @@ public class ContactsProvider {
         Cursor cursor = cr.query(Contacts.CONTENT_URI, CONTACTS_PROJECTION,
                 null,
                 null,
-                null);
+                Contacts.DISPLAY_NAME + " ASC");
 
         if (cursor != null && cursor.getCount() > 0) {
             ContactCursorWrapper contactCw = new ContactCursorWrapper(cursor, context);

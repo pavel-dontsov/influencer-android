@@ -1,9 +1,13 @@
 package co.runloop.influencer.fragment;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -13,10 +17,13 @@ import android.view.ViewGroup;
 
 import co.runloop.influencer.R;
 import co.runloop.influencer.adapter.ContactsAdapter;
+import co.runloop.influencer.data.ContactsProvider;
 
 public class ContactsFragment extends BaseFragment {
 
     private static final String TAG = ContactsFragment.class.getSimpleName();
+
+    private static final int READ_CONTACT_PERM_RC = 101;
 
     public static ContactsFragment newInstance() {
         Bundle args = new Bundle();
@@ -47,6 +54,47 @@ public class ContactsFragment extends BaseFragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(adapter);
 
+        if (contactsIsAvailable()) {
+            loadContacts();
+        }
+
         return root;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            loadContacts();
+        } else {
+            requestReadContactsPermission();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!contactsIsAvailable()) {
+            requestReadContactsPermission();
+        } else {
+            loadContacts();
+        }
+    }
+
+    private void loadContacts() {
+        ContactsProvider contactsProvider = new ContactsProvider(getActivity());
+        adapter.setContacts(contactsProvider.getAll());
+        adapter.notifyDataSetChanged();
+    }
+
+    private boolean contactsIsAvailable() {
+        return PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(
+                getActivity(),
+                Manifest.permission.READ_CONTACTS);
+    }
+
+    private void requestReadContactsPermission() {
+        requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, READ_CONTACT_PERM_RC);
     }
 }

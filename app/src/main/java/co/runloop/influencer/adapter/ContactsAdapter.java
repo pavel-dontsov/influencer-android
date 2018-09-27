@@ -3,11 +3,14 @@ package co.runloop.influencer.adapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +19,8 @@ import co.runloop.influencer.R;
 import co.runloop.influencer.model.Contact;
 
 public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ContactViewHolder> {
+
+    private static final String TAG = ContactsAdapter.class.getSimpleName();
 
     private List<Contact> contacts;
     private LayoutInflater layoutInflater;
@@ -65,9 +70,19 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
         public void bind(Contact contact) {
             nameTv.setText(contact.getName());
             phoneNumberTv.setText(contact.getPhoneNumber());
-            if (contact.getPhotoUri() != null) {
-                //TODO load img
+            if (contact.getThumbnailUri() != null) {
+                Glide.with(context)
+                        .load(contact.getThumbnailUri())
+                        .into(photoImgv);
             }
         }
+    }
+
+    public List<Contact> getContacts() {
+        return contacts;
+    }
+
+    public void setContacts(List<Contact> contacts) {
+        this.contacts = contacts;
     }
 }
