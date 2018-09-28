@@ -101,11 +101,6 @@ public class SmsAuthFragment extends BaseFragment {
 
             }
         });
-
-        if (ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_DENIED) {
-            requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, READ_PHONE_STATE_PERM_RC);
-        }
     }
 
     @Nullable
@@ -144,17 +139,28 @@ public class SmsAuthFragment extends BaseFragment {
             smsAuthViewModel.submitConfirmCode(codeEt.getText().toString().trim());
         });
 
+        if (ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_DENIED) {
+            requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, READ_PHONE_STATE_PERM_RC);
+        } else {
+            retrievePhoneNumber();
+        }
+
         return root;
     }
 
-    @Override
     @SuppressWarnings({"MissingPermission", "HardwareIds"})
+    private void retrievePhoneNumber() {
+        TelephonyManager telephonyManager = (TelephonyManager)
+                getActivity().getSystemService(Context.TELEPHONY_SERVICE);
+        phoneNumberEt.setText(telephonyManager.getLine1Number());
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == READ_PHONE_STATE_PERM_RC) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                TelephonyManager telephonyManager = (TelephonyManager)
-                        getActivity().getSystemService(Context.TELEPHONY_SERVICE);
-                phoneNumberEt.setText(telephonyManager.getLine1Number());
+                retrievePhoneNumber();
             }
         }
     }

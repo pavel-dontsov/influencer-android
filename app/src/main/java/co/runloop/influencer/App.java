@@ -2,6 +2,8 @@ package co.runloop.influencer;
 
 import android.app.Application;
 
+import com.squareup.leakcanary.LeakCanary;
+
 public class App extends Application {
 
     private static App instance;
@@ -15,5 +17,8 @@ public class App extends Application {
         super.onCreate();
 
         instance = this;
+
+        LeakCanary.install(this);
+        LeakCanary.enableDisplayLeakActivity(this);
     }
 }

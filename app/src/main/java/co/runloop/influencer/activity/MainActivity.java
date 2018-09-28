@@ -1,5 +1,6 @@
 package co.runloop.influencer.activity;
 
+import android.app.Activity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -19,7 +20,7 @@ public class MainActivity extends BaseActivity {
         FragmentManager fm = getSupportFragmentManager();
         Fragment fragment = fm.findFragmentById(R.id.act_main_frag_container);
         if (fragment == null) {
-            fragment = SmsAuthFragment.newInstance();
+            fragment = ContactsFragment.newInstance();
             fm.beginTransaction()
                     .add(R.id.act_main_frag_container, fragment)
                     .commitAllowingStateLoss();
