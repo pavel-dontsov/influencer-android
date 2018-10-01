@@ -1,18 +1,14 @@
 package co.runloop.influencer.fragment;
 
 import android.Manifest;
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +17,6 @@ import java.util.List;
 
 import co.runloop.influencer.R;
 import co.runloop.influencer.adapter.ContactsAdapter;
-import co.runloop.influencer.data.ContactsProvider;
 import co.runloop.influencer.model.Contact;
 import co.runloop.influencer.viewmodel.ContactsViewModel;
 
@@ -32,11 +27,7 @@ public class ContactsFragment extends BaseFragment {
     private static final int READ_CONTACT_PERM_RC = 101;
 
     public static ContactsFragment newInstance() {
-        Bundle args = new Bundle();
-        ContactsFragment fragment = new ContactsFragment();
-        fragment.setArguments(args);
-
-        return fragment;
+        return new ContactsFragment();
     }
 
     private RecyclerView recyclerView;
@@ -76,7 +67,9 @@ public class ContactsFragment extends BaseFragment {
                 contactsViewModel.loadAll();
             }
         }
-
+        if (!contactsIsAvailable()) {
+            requestReadContactsPermission();
+        }
         return root;
     }
 
@@ -90,17 +83,12 @@ public class ContactsFragment extends BaseFragment {
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (!contactsIsAvailable()) {
-            requestReadContactsPermission();
-        }
-    }
-
     private boolean contactsIsAvailable() {
+        if (getContext() == null) {
+            return false;
+        }
         return PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(
-                getActivity(),
+                getContext(),
                 Manifest.permission.READ_CONTACTS);
     }
 
