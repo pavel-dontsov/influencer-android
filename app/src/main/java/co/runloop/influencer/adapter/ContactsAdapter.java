@@ -1,9 +1,7 @@
 package co.runloop.influencer.adapter;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,23 +21,15 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
     private static final String TAG = ContactsAdapter.class.getSimpleName();
 
     private List<Contact> contacts;
-    private LayoutInflater layoutInflater;
-    private Context context;
 
     public ContactsAdapter() {
         contacts = new ArrayList<>();
     }
 
-    @Override
-    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
-        super.onAttachedToRecyclerView(recyclerView);
-        context = recyclerView.getContext();
-        layoutInflater = LayoutInflater.from(context);
-    }
-
     @NonNull
     @Override
     public ContactViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int pos) {
+        LayoutInflater layoutInflater = LayoutInflater.from(viewGroup.getContext());
         View itemView = layoutInflater.inflate(R.layout.item_contact, viewGroup, false);
         return new ContactViewHolder(itemView);
     }
@@ -54,26 +44,34 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
         return contacts.size();
     }
 
+    @Override
+    public void onViewRecycled(@NonNull ContactViewHolder holder) {
+        super.onViewRecycled(holder);
+        holder.phoneNumberTv.setText(null);
+        holder.nameTv.setText(null);
+        holder.thumbnailImgv.setImageDrawable(null);
+    }
+
     class ContactViewHolder extends RecyclerView.ViewHolder {
 
         private TextView nameTv;
         private TextView phoneNumberTv;
-        private ImageView photoImgv;
+        private ImageView thumbnailImgv;
 
         public ContactViewHolder(@NonNull View itemView) {
             super(itemView);
             nameTv = itemView.findViewById(R.id.item_contact_person_name_tv);
             phoneNumberTv = itemView.findViewById(R.id.item_contact_phone_number_tv);
-            photoImgv = itemView.findViewById(R.id.item_contact_person_imgv);
+            thumbnailImgv = itemView.findViewById(R.id.item_contact_person_imgv);
         }
 
         public void bind(Contact contact) {
             nameTv.setText(contact.getName());
             phoneNumberTv.setText(contact.getPhoneNumber());
             if (contact.getThumbnailUri() != null) {
-                Glide.with(context)
+                Glide.with(thumbnailImgv)
                         .load(contact.getThumbnailUri())
-                        .into(photoImgv);
+                        .into(thumbnailImgv);
             }
         }
     }
