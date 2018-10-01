@@ -1,6 +1,6 @@
 package co.runloop.influencer.utils;
 
-public interface SimpleObserver {
+public interface DataObserver {
 
     void onChange();
 }
