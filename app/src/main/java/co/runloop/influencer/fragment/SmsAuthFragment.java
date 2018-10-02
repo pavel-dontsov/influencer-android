@@ -17,9 +17,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import com.sinch.verification.CodeInterceptionException;
+import com.sinch.verification.IncorrectCodeException;
 import com.sinch.verification.InitiationResult;
 import com.sinch.verification.InvalidInputException;
 import com.sinch.verification.PhoneNumberFormattingTextWatcher;
@@ -75,6 +75,8 @@ public class SmsAuthFragment extends BaseFragment {
                     // Incorrect phone number
                 } else if (e instanceof ServiceErrorException) {
                     // Sinch service error
+                } else {
+                    //Some other problem, like UnknownHostException
                 }
             }
 
@@ -87,12 +89,16 @@ public class SmsAuthFragment extends BaseFragment {
             public void onVerificationFailed(Exception e) {
                 if (e instanceof InvalidInputException) {
                     // Invalid phone number
+                } else if (e instanceof IncorrectCodeException) {
+                    // Wrong code
                 } else if (e instanceof CodeInterceptionException) {
                     // Auto code handle failed, code should be written by user
                     codeEt.setVisibility(View.VISIBLE);
                     submitCodeBtn.setVisibility(View.VISIBLE);
                 } else if (e instanceof ServiceErrorException) {
                     // Sinch service error
+                } else {
+                    //Some other problem, like UnknownHostException
                 }
             }
 
@@ -139,7 +145,7 @@ public class SmsAuthFragment extends BaseFragment {
             smsAuthViewModel.submitConfirmCode(codeEt.getText().toString().trim());
         });
 
-        if (ContextCompat.checkSelfPermission(getActivity(),
+        if (ContextCompat.checkSelfPermission(getContext(),
                 Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_DENIED) {
             requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, READ_PHONE_STATE_PERM_RC);
         } else {
