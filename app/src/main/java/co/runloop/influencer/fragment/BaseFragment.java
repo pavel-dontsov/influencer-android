@@ -7,6 +7,10 @@ import co.runloop.influencer.activity.BaseActivity;
 
 public abstract class BaseFragment extends Fragment {
 
+    public boolean isActionBarAvailable() {
+        return getBaseActivity().getSupportActionBar() != null;
+    }
+
     public AppCompatActivity getAppCompatActivity() {
         return (AppCompatActivity) getActivity();
     }
