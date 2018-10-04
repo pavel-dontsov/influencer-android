@@ -12,6 +12,7 @@ import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +30,12 @@ import com.sinch.verification.VerificationListener;
 
 import java.util.Locale;
 
+import co.runloop.influencer.App;
 import co.runloop.influencer.R;
+import co.runloop.influencer.data.net.auth.SmsAuthInvalidCodeException;
+import co.runloop.influencer.data.net.auth.SmsAuthInvalidPhoneNumberException;
+import co.runloop.influencer.data.net.auth.SmsAuthServiceException;
+import co.runloop.influencer.data.net.auth.SmsVerificationListener;
 import co.runloop.influencer.viewmodel.SmsAuthViewModel;
 
 public class SmsAuthFragment extends BaseFragment {
@@ -63,48 +69,36 @@ public class SmsAuthFragment extends BaseFragment {
         smsAuthViewModel = ViewModelProviders
                 .of(this)
                 .get(SmsAuthViewModel.class);
-        smsAuthViewModel.registerVerificationListener(new VerificationListener() {
+        smsAuthViewModel.registerVerificationListener(new SmsVerificationListener() {
             @Override
-            public void onInitiated(InitiationResult initiationResult) {
-
+            public void onVerificationCompleted() {
+                Log.d(TAG, "onVerificationCompleted");
             }
 
             @Override
-            public void onInitiationFailed(Exception e) {
-                if (e instanceof InvalidInputException) {
-                    // Incorrect phone number
-                } else if (e instanceof ServiceErrorException) {
-                    // Sinch service error
-                } else {
-                    //Some other problem, like UnknownHostException
-                }
+            public void onVerificationFailed(Exception ex) {
+                Log.e(TAG, "onVerificationFailed", ex);
             }
 
             @Override
-            public void onVerified() {
-
+            public void onCodeSent() {
+                Log.d(TAG, "onCodeSent");
+                codeEt.setVisibility(View.VISIBLE);
+                submitCodeBtn.setVisibility(View.VISIBLE);
             }
 
             @Override
-            public void onVerificationFailed(Exception e) {
-                if (e instanceof InvalidInputException) {
+            public void onCodeSentFailed(Exception ex) {
+                Log.e(TAG, "onCodeSentFailed", ex);
+                if (ex instanceof SmsAuthInvalidPhoneNumberException) {
                     // Invalid phone number
-                } else if (e instanceof IncorrectCodeException) {
+                } else if (ex instanceof SmsAuthInvalidCodeException) {
                     // Wrong code
-                } else if (e instanceof CodeInterceptionException) {
-                    // Auto code handle failed, code should be written by user
-                    codeEt.setVisibility(View.VISIBLE);
-                    submitCodeBtn.setVisibility(View.VISIBLE);
-                } else if (e instanceof ServiceErrorException) {
+                } else if (ex instanceof SmsAuthServiceException) {
                     // Sinch service error
                 } else {
                     //Some other problem, like UnknownHostException
                 }
-            }
-
-            @Override
-            public void onVerificationFallback() {
-
             }
         });
     }
@@ -126,7 +120,7 @@ public class SmsAuthFragment extends BaseFragment {
                     submitPhoneNumberBtn.setEnabled(true);
                     phoneNumberEt.setTextColor(Color.BLACK);
                 } else {
-                    submitPhoneNumberBtn.setEnabled(false);
+                    //submitPhoneNumberBtn.setEnabled(false);
                     phoneNumberEt.setTextColor(Color.RED);
                 }
             }
@@ -145,7 +139,7 @@ public class SmsAuthFragment extends BaseFragment {
             smsAuthViewModel.submitConfirmCode(codeEt.getText().toString().trim());
         });
 
-        if (ContextCompat.checkSelfPermission(getContext(),
+        if (ContextCompat.checkSelfPermission(App.get().getApplicationContext(),
                 Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_DENIED) {
             requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, READ_PHONE_STATE_PERM_RC);
         } else {
@@ -158,7 +152,7 @@ public class SmsAuthFragment extends BaseFragment {
     @SuppressWarnings({"MissingPermission", "HardwareIds"})
     private void retrievePhoneNumber() {
         TelephonyManager telephonyManager = (TelephonyManager)
-                getActivity().getSystemService(Context.TELEPHONY_SERVICE);
+                App.get().getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
         phoneNumberEt.setText(telephonyManager.getLine1Number());
     }
 

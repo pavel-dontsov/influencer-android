@@ -4,32 +4,35 @@ import android.arch.lifecycle.ViewModel;
 
 import com.sinch.verification.VerificationListener;
 
-import co.runloop.influencer.data.net.SmsAuthManager;
+import co.runloop.influencer.data.net.auth.FirebaseSmsAuth;
+import co.runloop.influencer.data.net.auth.ISmsAuthApi;
+import co.runloop.influencer.data.net.auth.SinchSmsAuth;
+import co.runloop.influencer.data.net.auth.SmsVerificationListener;
 
 public class SmsAuthViewModel extends ViewModel {
 
-    private SmsAuthManager smsAuthManager;
-    private VerificationListener verificationListener;
+    private ISmsAuthApi smsAuthApi;
+    private SmsVerificationListener verificationListener;
 
     public SmsAuthViewModel() {
-        smsAuthManager = new SmsAuthManager();
+        smsAuthApi = new SinchSmsAuth();
     }
 
     public void submitPhoneNumber(String phoneNumber) {
-        smsAuthManager.smsVerification(phoneNumber);
+        smsAuthApi.requestSms(phoneNumber);
     }
 
     public void submitConfirmCode(String code) {
-        smsAuthManager.submitConfirmCode(code);
+        smsAuthApi.submitConfirmCode(code);
     }
 
-    public void registerVerificationListener(VerificationListener listener) {
+    public void registerVerificationListener(SmsVerificationListener listener) {
         this.verificationListener = listener;
-        smsAuthManager.registerVerificationListener(listener);
+        smsAuthApi.registerVerificationListener(listener);
     }
 
     @Override
     protected void onCleared() {
-        smsAuthManager.unregisterVerificationListener(verificationListener);
+        smsAuthApi.unregisterVerificationListener(verificationListener);
     }
 }
