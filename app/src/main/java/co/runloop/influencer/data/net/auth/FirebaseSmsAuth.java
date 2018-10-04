@@ -3,7 +3,6 @@ package co.runloop.influencer.data.net.auth;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.google.firebase.FirebaseException;
 import com.google.firebase.FirebaseTooManyRequestsException;
@@ -13,7 +12,6 @@ import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 
@@ -21,7 +19,7 @@ public class FirebaseSmsAuth extends AbstractSmsAuthApi {
 
     private static final String TAG = FirebaseSmsAuth.class.getSimpleName();
 
-    private static final long TIMEOUT = 120;
+    private static final long AUTO_RETRIEVAL_TIMEOUT = 30;
 
     private PhoneAuthProvider smsApi;
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks verificationCallback;
@@ -49,7 +47,6 @@ public class FirebaseSmsAuth extends AbstractSmsAuthApi {
 
             @Override
             public void onVerificationFailed(FirebaseException e) {
-                Log.e(TAG, "onVerificationFailed", e);
                 // This callback is invoked in an invalid request for verification is made,
                 // for instance if the the phone number format is not valid.
                 if (getVerificationListener() != null) {
@@ -88,7 +85,7 @@ public class FirebaseSmsAuth extends AbstractSmsAuthApi {
     public void requestSms(@NonNull String phoneNumber) {
         if (phoneNumber.equals(this.phoneNumber) && resendingToken != null) {
             smsApi.verifyPhoneNumber(phoneNumber,
-                    TIMEOUT,
+                    AUTO_RETRIEVAL_TIMEOUT,
                     TimeUnit.SECONDS,
                     executor,
                     verificationCallback,
@@ -96,7 +93,7 @@ public class FirebaseSmsAuth extends AbstractSmsAuthApi {
         } else {
             this.phoneNumber = phoneNumber;
             smsApi.verifyPhoneNumber(phoneNumber,
-                    TIMEOUT,
+                    AUTO_RETRIEVAL_TIMEOUT,
                     TimeUnit.SECONDS,
                     executor,
                     verificationCallback);
@@ -115,7 +112,6 @@ public class FirebaseSmsAuth extends AbstractSmsAuthApi {
             if (task.isSuccessful()) {
                 getVerificationListener().onVerificationCompleted();
             } else {
-                Log.e(TAG, "ex", task.getException());
                 if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
                     getVerificationListener().onVerificationFailed(new SmsAuthInvalidCodeException());
                 } else {

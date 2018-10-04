@@ -72,24 +72,20 @@ public class SmsAuthFragment extends BaseFragment {
         smsAuthViewModel.registerVerificationListener(new SmsVerificationListener() {
             @Override
             public void onVerificationCompleted() {
-                Log.d(TAG, "onVerificationCompleted");
             }
 
             @Override
             public void onVerificationFailed(Exception ex) {
-                Log.e(TAG, "onVerificationFailed", ex);
             }
 
             @Override
             public void onCodeSent() {
-                Log.d(TAG, "onCodeSent");
                 codeEt.setVisibility(View.VISIBLE);
                 submitCodeBtn.setVisibility(View.VISIBLE);
             }
 
             @Override
             public void onCodeSentFailed(Exception ex) {
-                Log.e(TAG, "onCodeSentFailed", ex);
                 if (ex instanceof SmsAuthInvalidPhoneNumberException) {
                     // Invalid phone number
                 } else if (ex instanceof SmsAuthInvalidCodeException) {
@@ -120,7 +116,7 @@ public class SmsAuthFragment extends BaseFragment {
                     submitPhoneNumberBtn.setEnabled(true);
                     phoneNumberEt.setTextColor(Color.BLACK);
                 } else {
-                    //submitPhoneNumberBtn.setEnabled(false);
+                    submitPhoneNumberBtn.setEnabled(false);
                     phoneNumberEt.setTextColor(Color.RED);
                 }
             }

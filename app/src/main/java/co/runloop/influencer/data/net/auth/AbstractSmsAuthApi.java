@@ -1,5 +1,7 @@
 package co.runloop.influencer.data.net.auth;
 
+import android.support.annotation.NonNull;
+
 public abstract class AbstractSmsAuthApi implements ISmsAuthApi {
 
     private SmsVerificationListener verificationListener;
@@ -13,10 +15,7 @@ public abstract class AbstractSmsAuthApi implements ISmsAuthApi {
     public abstract void submitConfirmCode(String code);
 
     @Override
-    public void registerVerificationListener(SmsVerificationListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("Listener cannot be null!");
-        }
+    public void registerVerificationListener(@NonNull SmsVerificationListener listener) {
         verificationListener = listener;
     }
 
