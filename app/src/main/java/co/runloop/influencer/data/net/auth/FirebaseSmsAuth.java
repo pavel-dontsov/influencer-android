@@ -2,6 +2,7 @@ package co.runloop.influencer.data.net.auth;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.firebase.FirebaseException;
@@ -84,10 +85,7 @@ public class FirebaseSmsAuth extends AbstractSmsAuthApi {
     }
 
     @Override
-    public void requestSms(String phoneNumber) {
-        if (phoneNumber == null) {
-            throw new IllegalArgumentException("phoneNumber cannot be null!");
-        }
+    public void requestSms(@NonNull String phoneNumber) {
         if (phoneNumber.equals(this.phoneNumber) && resendingToken != null) {
             smsApi.verifyPhoneNumber(phoneNumber,
                     TIMEOUT,
@@ -107,7 +105,7 @@ public class FirebaseSmsAuth extends AbstractSmsAuthApi {
     }
 
     @Override
-    public void submitConfirmCode(String code) {
+    public void submitConfirmCode(@NonNull String code) {
         PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, code);
         signIn(credential);
     }

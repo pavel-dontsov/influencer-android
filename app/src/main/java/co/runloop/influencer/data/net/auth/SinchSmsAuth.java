@@ -1,5 +1,7 @@
 package co.runloop.influencer.data.net.auth;
 
+import android.support.annotation.NonNull;
+
 import com.sinch.verification.CodeInterceptionException;
 import com.sinch.verification.Config;
 import com.sinch.verification.IncorrectCodeException;
@@ -87,7 +89,7 @@ public class SinchSmsAuth extends AbstractSmsAuthApi {
     }
 
     @Override
-    public void requestSms(String phoneNumber) {
+    public void requestSms(@NonNull String phoneNumber) {
         if (curVerification == null
                 || !phoneNumber.equals(curPhoneNumber)) {
             curPhoneNumber = phoneNumber;
@@ -100,7 +102,7 @@ public class SinchSmsAuth extends AbstractSmsAuthApi {
     }
 
     @Override
-    public void submitConfirmCode(String code) {
+    public void submitConfirmCode(@NonNull String code) {
         curVerification.verify(code);
     }
 }
