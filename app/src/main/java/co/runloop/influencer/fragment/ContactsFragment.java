@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,22 +64,22 @@ public class ContactsFragment extends BaseFragment {
         contactsViewModel = ViewModelProviders
                 .of(this)
                 .get(ContactsViewModel.class);
-        contactsViewModel.getContacts().observe(this, (@Nullable Resource<List<Contact>> contacts) -> {
-            if (contacts == null) {
+        contactsViewModel.getContacts().observe(this, (@Nullable Resource<List<Contact>> contactsRes) -> {
+            if (contactsRes == null) {
                 progressBar.setVisibility(View.GONE);
                 return;
             }
-            switch (contacts.getStatus()) {
+            switch (contactsRes.getStatus()) {
                 case Progress:
                     progressBar.setVisibility(View.VISIBLE);
                     break;
                 case Completed:
-                    adapter.setContacts(contacts.getData());
+                    adapter.setContacts(contactsRes.getData());
                     adapter.notifyDataSetChanged();
                     progressBar.setVisibility(View.GONE);
                     break;
                 case Error:
-                    if (contacts.getError() instanceof SecurityException && !contactsIsAvailable()) {
+                    if (contactsRes.getError() instanceof SecurityException && !contactsIsAvailable()) {
                         requestReadContactsPermission();
                     }
                     progressBar.setVisibility(View.GONE);
