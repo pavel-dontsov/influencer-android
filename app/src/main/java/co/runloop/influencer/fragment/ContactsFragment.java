@@ -12,12 +12,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import java.util.List;
 
 import co.runloop.influencer.R;
 import co.runloop.influencer.adapter.ContactsAdapter;
 import co.runloop.influencer.model.Contact;
+import co.runloop.influencer.model.Resource;
 import co.runloop.influencer.viewmodel.ContactsViewModel;
 
 public class ContactsFragment extends BaseFragment {
@@ -31,6 +33,8 @@ public class ContactsFragment extends BaseFragment {
     }
 
     private RecyclerView recyclerView;
+    private ProgressBar progressBar;
+
     private ContactsAdapter adapter;
     private ContactsViewModel contactsViewModel;
 
@@ -54,21 +58,35 @@ public class ContactsFragment extends BaseFragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(adapter);
 
+        progressBar = root.findViewById(R.id.frag_contacts_list_progressbar);
+
         contactsViewModel = ViewModelProviders
                 .of(this)
                 .get(ContactsViewModel.class);
-        contactsViewModel.getContacts().observe(this, (@Nullable List<Contact> contacts) -> {
-            adapter.setContacts(contacts);
-            adapter.notifyDataSetChanged();
-        });
-        if (contactsIsAvailable()) {
-            contactsViewModel.onPermissionGranted();
-            if(contactsViewModel.getContacts().getValue() == null) {
-                contactsViewModel.loadAll();
+        contactsViewModel.getContacts().observe(this, (@Nullable Resource<List<Contact>> contactsRes) -> {
+            if (contactsRes == null) {
+                contactsRes = new Resource<>(Resource.Status.Error);
             }
-        }
-        if (!contactsIsAvailable()) {
-            requestReadContactsPermission();
+            switch (contactsRes.getStatus()) {
+                case Progress:
+                    progressBar.setVisibility(View.VISIBLE);
+                    break;
+                case Completed:
+                    adapter.setContacts(contactsRes.getData());
+                    adapter.notifyDataSetChanged();
+                    progressBar.setVisibility(View.GONE);
+                    break;
+                case Error:
+                    if (contactsRes.getError() instanceof SecurityException && !contactsPermissionIsAvailable()) {
+                        requestReadContactsPermission();
+                    }
+                    progressBar.setVisibility(View.GONE);
+                    break;
+            }
+        });
+
+        if (!contactsViewModel.contactsIsAvailable()) {
+            contactsViewModel.loadAll();
         }
         return root;
     }
@@ -77,13 +95,14 @@ public class ContactsFragment extends BaseFragment {
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        if (contactsIsAvailable()) {
-            contactsViewModel.onPermissionGranted();
-            contactsViewModel.loadAll();
+        if (requestCode == READ_CONTACT_PERM_RC) {
+            if (contactsPermissionIsAvailable()) {
+                contactsViewModel.loadAll();
+            }
         }
     }
 
-    private boolean contactsIsAvailable() {
+    private boolean contactsPermissionIsAvailable() {
         if (getContext() == null) {
             return false;
         }
