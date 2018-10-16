@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -78,7 +77,7 @@ public class ContactsFragment extends BaseFragment {
                     progressBar.setVisibility(View.GONE);
                     break;
                 case Error:
-                    if (contactsRes.getError() instanceof SecurityException && !contactsIsAvailable()) {
+                    if (contactsRes.getError() instanceof SecurityException && !contactsPermissionIsAvailable()) {
                         requestReadContactsPermission();
                     }
                     progressBar.setVisibility(View.GONE);
@@ -97,13 +96,13 @@ public class ContactsFragment extends BaseFragment {
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         if (requestCode == READ_CONTACT_PERM_RC) {
-            if (contactsIsAvailable()) {
+            if (contactsPermissionIsAvailable()) {
                 contactsViewModel.loadAll();
             }
         }
     }
 
-    private boolean contactsIsAvailable() {
+    private boolean contactsPermissionIsAvailable() {
         if (getContext() == null) {
             return false;
         }
