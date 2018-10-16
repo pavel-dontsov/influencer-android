@@ -66,8 +66,7 @@ public class ContactsFragment extends BaseFragment {
                 .get(ContactsViewModel.class);
         contactsViewModel.getContacts().observe(this, (@Nullable Resource<List<Contact>> contactsRes) -> {
             if (contactsRes == null) {
-                progressBar.setVisibility(View.GONE);
-                return;
+                contactsRes = new Resource<>(Resource.Status.Error);
             }
             switch (contactsRes.getStatus()) {
                 case Progress:
@@ -87,8 +86,7 @@ public class ContactsFragment extends BaseFragment {
             }
         });
 
-        if (contactsViewModel.getContacts().getValue() == null
-                || contactsViewModel.getContacts().getValue().getStatus() != Resource.Status.Completed) {
+        if (!contactsViewModel.contactsIsAvailable()) {
             contactsViewModel.loadAll();
         }
         return root;

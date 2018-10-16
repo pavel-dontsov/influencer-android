@@ -37,6 +37,11 @@ public class ContactsViewModel extends AndroidViewModel {
         shouldRegisterObserver = true;
     }
 
+    public boolean contactsIsAvailable() {
+        return contacts.getValue() != null
+                && contacts.getValue().getStatus() == Resource.Status.Completed;
+    }
+
     private void registerObserver() {
         provider.unregisrerContactsChangesObserver();
         provider.registerContactsChangesObserver(observer);
