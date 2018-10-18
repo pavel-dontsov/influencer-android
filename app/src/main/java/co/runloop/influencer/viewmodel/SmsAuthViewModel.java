@@ -1,6 +1,7 @@
 package co.runloop.influencer.viewmodel;
 
 import android.arch.lifecycle.ViewModel;
+import android.text.TextUtils;
 
 import com.sinch.verification.VerificationListener;
 

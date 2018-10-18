@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.sinch.verification.CodeInterceptionException;
 import com.sinch.verification.IncorrectCodeException;
@@ -111,21 +112,16 @@ public class SmsAuthFragment extends BaseFragment {
             @Override
             public synchronized void afterTextChanged(Editable s) {
                 super.afterTextChanged(s);
-
-                if (PhoneNumberUtils.isPossibleNumber(getPreFormatedNumber(), defLocale.getCountry())) {
-                    submitPhoneNumberBtn.setEnabled(true);
-                    phoneNumberEt.setTextColor(Color.BLACK);
-                } else {
-                    submitPhoneNumberBtn.setEnabled(false);
-                    phoneNumberEt.setTextColor(Color.RED);
-                }
+                updatePhoneNumberValidity(s.toString());
             }
         };
         phoneNumberEt.addTextChangedListener(watcher);
 
         submitPhoneNumberBtn = root.findViewById(R.id.frag_sms_auth_submit_phone_btn);
         submitPhoneNumberBtn.setOnClickListener(view -> {
-            String number = PhoneNumberUtils.formatNumberToE164(getPreFormatedNumber(), defLocale.getCountry());
+            String number = PhoneNumberUtils.formatNumberToE164(
+                    phoneNumberEt.getText().toString(),
+                    defLocale.getCountry());
             smsAuthViewModel.submitPhoneNumber(number);
         });
 
@@ -141,8 +137,19 @@ public class SmsAuthFragment extends BaseFragment {
         } else {
             retrievePhoneNumber();
         }
+        updatePhoneNumberValidity(phoneNumberEt.getText().toString());
 
         return root;
+    }
+
+    private void updatePhoneNumberValidity(String phoneNumber) {
+        if (PhoneNumberUtils.isPossibleNumber(phoneNumber, defLocale.getCountry())) {
+            submitPhoneNumberBtn.setEnabled(true);
+            phoneNumberEt.setTextColor(Color.BLACK);
+        } else {
+            submitPhoneNumberBtn.setEnabled(false);
+            phoneNumberEt.setTextColor(Color.RED);
+        }
     }
 
     @SuppressWarnings({"MissingPermission", "HardwareIds"})
@@ -153,19 +160,13 @@ public class SmsAuthFragment extends BaseFragment {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         if (requestCode == READ_PHONE_STATE_PERM_RC) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 retrievePhoneNumber();
             }
         }
-    }
-
-    private String getPreFormatedNumber() {
-        String number = phoneNumberEt.getText().toString();
-        if (!number.startsWith("+")) {
-            number = "+" + number;
-        }
-        return number;
     }
 }
