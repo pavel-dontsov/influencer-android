@@ -4,25 +4,23 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.ViewModel;
-import android.util.Log;
 
 import java.util.List;
 
 import co.runloop.influencer.data.ContactsProvider;
 import co.runloop.influencer.model.Contact;
-import co.runloop.influencer.utils.SimpleObserver;
+import co.runloop.influencer.utils.DataObserver;
 
 public class ContactsViewModel extends AndroidViewModel {
 
     private MutableLiveData<List<Contact>> contacts;
     private ContactsProvider provider;
-    private SimpleObserver observer;
+    private DataObserver observer;
 
     public ContactsViewModel(Application app) {
         super(app);
         contacts = new MutableLiveData<>();
-        provider = new ContactsProvider(app);
+        provider = new ContactsProvider(app.getApplicationContext().getContentResolver());
         observer = () -> {
             loadAll();
         };

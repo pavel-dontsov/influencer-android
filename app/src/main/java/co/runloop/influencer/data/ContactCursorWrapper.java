@@ -1,21 +1,24 @@
 package co.runloop.influencer.data;
 
-import android.content.Context;
+import android.content.ContentResolver;
 import android.database.Cursor;
 import android.database.CursorWrapper;
-import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Contacts;
 
 import co.runloop.influencer.model.Contact;
 
-public class ContactCursorWrapper extends CursorWrapper {
+class ContactCursorWrapper extends CursorWrapper {
 
-    private Context context;
+    public static final String[] PHONE_PROJECTION = {
+            Phone.NUMBER
+    };
 
-    public ContactCursorWrapper(Cursor cursor, Context context) {
+    private ContentResolver contentResolver;
+
+    public ContactCursorWrapper(Cursor cursor, ContentResolver contentResolver) {
         super(cursor);
-        this.context = context;
+        this.contentResolver = contentResolver;
     }
 
     public Contact extractContact() {
@@ -25,11 +28,11 @@ public class ContactCursorWrapper extends CursorWrapper {
         contact.setThumbnailUri(getString(getColumnIndex(Contacts.PHOTO_THUMBNAIL_URI)));
         contact.setPhotoUri(getString(getColumnIndex(Contacts.PHOTO_URI)));
 
-        int havePhoneNumber = getInt(getColumnIndex(Contacts.HAS_PHONE_NUMBER));
-        if (havePhoneNumber == 1) {
-            Cursor phoneCursor = context.getContentResolver().query(
+        int hasPhoneNumber = getInt(getColumnIndex(Contacts.HAS_PHONE_NUMBER));
+        if (hasPhoneNumber == 1) {
+            Cursor phoneCursor = contentResolver.query(
                     Phone.CONTENT_URI,
-                    ContactsProvider.PHONE_PROJECTION,
+                    PHONE_PROJECTION,
                     Phone.CONTACT_ID + " = ?",
                     new String[]{String.valueOf(contact.getId())},
                     null);

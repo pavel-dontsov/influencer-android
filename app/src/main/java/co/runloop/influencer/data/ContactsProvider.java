@@ -1,54 +1,46 @@
 package co.runloop.influencer.data;
 
 import android.content.ContentResolver;
-import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
-import android.provider.ContactsContract;
-import android.provider.ContactsContract.CommonDataKinds;
-import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Contacts;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import co.runloop.influencer.model.Contact;
-import co.runloop.influencer.utils.SimpleObserver;
+import co.runloop.influencer.utils.DataObserver;
 
 public class ContactsProvider {
 
     private static final String TAG = ContactsProvider.class.getSimpleName();
 
-    public static final String[] CONTACTS_PROJECTION = {
+    private static final String[] CONTACTS_PROJECTION = {
             Contacts._ID,
             Contacts.DISPLAY_NAME,
             Contacts.PHOTO_URI,
             Contacts.PHOTO_THUMBNAIL_URI,
             Contacts.HAS_PHONE_NUMBER,
     };
-    public static final String[] PHONE_PROJECTION = {
-            Phone.NUMBER
-    };
 
-    private Context context;
+
+    private ContentResolver contentResolver;
     private ContentObserver contentObserver;
 
-    public ContactsProvider(Context context) {
-        this.context = context;
+    public ContactsProvider(ContentResolver contentResolver) {
+        this.contentResolver = contentResolver;
     }
 
     public Contact getById(long id) {
-        ContentResolver cr = context.getContentResolver();
-        Cursor cursor = cr.query(Contacts.CONTENT_URI, CONTACTS_PROJECTION,
+        Cursor cursor = contentResolver.query(Contacts.CONTENT_URI, CONTACTS_PROJECTION,
                 Contacts._ID + " = ?",
                 new String[]{String.valueOf(id)},
                 null);
 
         if (cursor != null && cursor.getCount() > 0) {
-            ContactCursorWrapper contactCw = new ContactCursorWrapper(cursor, context);
+            ContactCursorWrapper contactCw = new ContactCursorWrapper(cursor, contentResolver);
             try {
                 contactCw.moveToFirst();
                 return contactCw.extractContact();
@@ -59,7 +51,7 @@ public class ContactsProvider {
         return null;
     }
 
-    public void registerContactsChangesObserver(SimpleObserver observer) {
+    public void registerContactsChangesObserver(DataObserver observer) {
         contentObserver = new ContentObserver(null) {
             @Override
             public boolean deliverSelfNotifications() {
@@ -76,14 +68,14 @@ public class ContactsProvider {
                 observer.onChange();
             }
         };
-        context.getContentResolver().registerContentObserver(Contacts.CONTENT_URI,
+        contentResolver.registerContentObserver(Contacts.CONTENT_URI,
                 true,
                 contentObserver);
     }
 
     public void unregisrerContactsChangesObserver() {
         if (contentObserver != null) {
-            context.getContentResolver().unregisterContentObserver(contentObserver);
+            contentResolver.unregisterContentObserver(contentObserver);
             contentObserver = null;
         }
     }
@@ -91,14 +83,13 @@ public class ContactsProvider {
     public List<Contact> getAll() {
         List<Contact> contacts = new ArrayList<>();
 
-        ContentResolver cr = context.getContentResolver();
-        Cursor cursor = cr.query(Contacts.CONTENT_URI, CONTACTS_PROJECTION,
+        Cursor cursor = contentResolver.query(Contacts.CONTENT_URI, CONTACTS_PROJECTION,
                 null,
                 null,
                 Contacts.DISPLAY_NAME + " ASC");
 
         if (cursor != null && cursor.getCount() > 0) {
-            ContactCursorWrapper contactCw = new ContactCursorWrapper(cursor, context);
+            ContactCursorWrapper contactCw = new ContactCursorWrapper(cursor, contentResolver);
             try {
                 contactCw.moveToFirst();
                 while (!contactCw.isAfterLast()) {
