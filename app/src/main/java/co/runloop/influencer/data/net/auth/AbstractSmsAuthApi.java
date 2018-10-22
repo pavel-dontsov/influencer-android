@@ -6,14 +6,6 @@ public abstract class AbstractSmsAuthApi implements ISmsAuthApi {
 
     private SmsVerificationListener verificationListener;
 
-    public AbstractSmsAuthApi() {
-
-    }
-
-    public abstract void requestSms(String phoneNumber);
-
-    public abstract void submitConfirmCode(String code);
-
     @Override
     public void registerVerificationListener(@NonNull SmsVerificationListener listener) {
         verificationListener = listener;

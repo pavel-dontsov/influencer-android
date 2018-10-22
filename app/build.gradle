@@ -42,6 +42,8 @@ dependencies {
     annotationProcessor "android.arch.lifecycle:compiler:$lifecycle_version"
     implementation "android.arch.lifecycle:common-java8:$lifecycle_version"
 
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.2'
+    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.2'
     debugImplementation 'com.squareup.leakcanary:leakcanary-support-fragment:1.6.1'
 
     implementation 'com.google.firebase:firebase-core:16.0.4'

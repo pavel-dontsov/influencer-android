@@ -50,13 +50,15 @@ public class FirebaseSmsAuth extends AbstractSmsAuthApi {
                 // This callback is invoked in an invalid request for verification is made,
                 // for instance if the the phone number format is not valid.
                 if (getVerificationListener() != null) {
+                    Exception ex;
                     if (e instanceof FirebaseAuthInvalidCredentialsException) {
-                        getVerificationListener().onCodeSentFailed(new SmsAuthInvalidPhoneNumberException());
+                        ex = new SmsAuthInvalidPhoneNumberException();
                     } else if (e instanceof FirebaseTooManyRequestsException) {
-                        getVerificationListener().onCodeSentFailed(new SmsAuthTooMuchTriesException());
+                        ex = new SmsAuthRetryCountExceededException();
                     } else {
-                        getVerificationListener().onCodeSentFailed(new SmsAuthServiceException());
+                        ex = new SmsAuthServiceException();
                     }
+                    getVerificationListener().onCodeSentFailed(ex);
                 }
             }
 
@@ -107,16 +109,18 @@ public class FirebaseSmsAuth extends AbstractSmsAuthApi {
         signIn(credential);
     }
 
-    public void signIn(PhoneAuthCredential credential) {
+    private void signIn(PhoneAuthCredential credential) {
         auth.signInWithCredential(credential).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 getVerificationListener().onVerificationCompleted();
             } else {
+                Exception ex;
                 if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
-                    getVerificationListener().onVerificationFailed(new SmsAuthInvalidCodeException());
+                    ex = new SmsAuthInvalidCodeException();
                 } else {
-                    getVerificationListener().onVerificationFailed(new SmsAuthServiceException());
+                    ex = new SmsAuthServiceException();
                 }
+                getVerificationListener().onVerificationFailed(ex);
             }
         });
     }

@@ -1,12 +1,15 @@
 package co.runloop.influencer.data.net.auth;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 public interface ISmsAuthApi {
 
-    void requestSms(String phoneNumber);
+    void requestSms(@NonNull String phoneNumber);
 
-    void submitConfirmCode(String code);
+    void submitConfirmCode(@Nullable String code);
 
-    void registerVerificationListener(SmsVerificationListener listener);
+    void registerVerificationListener(@NonNull SmsVerificationListener listener);
 
-    void unregisterVerificationListener(SmsVerificationListener listener);
+    void unregisterVerificationListener(@NonNull SmsVerificationListener listener);
 }

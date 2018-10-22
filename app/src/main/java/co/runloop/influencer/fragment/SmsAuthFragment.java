@@ -18,16 +18,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
-import com.sinch.verification.CodeInterceptionException;
-import com.sinch.verification.IncorrectCodeException;
-import com.sinch.verification.InitiationResult;
-import com.sinch.verification.InvalidInputException;
 import com.sinch.verification.PhoneNumberFormattingTextWatcher;
 import com.sinch.verification.PhoneNumberUtils;
-import com.sinch.verification.ServiceErrorException;
-import com.sinch.verification.VerificationListener;
 
 import java.util.Locale;
 
@@ -44,6 +37,7 @@ public class SmsAuthFragment extends BaseFragment {
     private static final String TAG = SmsAuthFragment.class.getSimpleName();
 
     private static final int READ_PHONE_STATE_PERM_RC = 1;
+    private static final Locale DEF_LOCALE = new Locale("", "IL");
 
     public static SmsAuthFragment newInstance() {
 
@@ -61,12 +55,9 @@ public class SmsAuthFragment extends BaseFragment {
 
     private SmsAuthViewModel smsAuthViewModel;
 
-    private Locale defLocale;
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        defLocale = new Locale("", "IL");
         smsAuthViewModel = ViewModelProviders
                 .of(this)
                 .get(SmsAuthViewModel.class);
@@ -108,7 +99,7 @@ public class SmsAuthFragment extends BaseFragment {
         View root = inflater.inflate(R.layout.frag_sms_auth, container, false);
 
         phoneNumberEt = root.findViewById(R.id.frag_sms_auth_phone_number_et);
-        TextWatcher watcher = new PhoneNumberFormattingTextWatcher(defLocale.getCountry()) {
+        TextWatcher watcher = new PhoneNumberFormattingTextWatcher(DEF_LOCALE.getCountry()) {
             @Override
             public synchronized void afterTextChanged(Editable s) {
                 super.afterTextChanged(s);
@@ -121,7 +112,7 @@ public class SmsAuthFragment extends BaseFragment {
         submitPhoneNumberBtn.setOnClickListener(view -> {
             String number = PhoneNumberUtils.formatNumberToE164(
                     phoneNumberEt.getText().toString(),
-                    defLocale.getCountry());
+                    DEF_LOCALE.getCountry());
             smsAuthViewModel.submitPhoneNumber(number);
         });
 
@@ -143,7 +134,7 @@ public class SmsAuthFragment extends BaseFragment {
     }
 
     private void updatePhoneNumberValidity(String phoneNumber) {
-        if (PhoneNumberUtils.isPossibleNumber(phoneNumber, defLocale.getCountry())) {
+        if (PhoneNumberUtils.isPossibleNumber(phoneNumber, DEF_LOCALE.getCountry())) {
             submitPhoneNumberBtn.setEnabled(true);
             phoneNumberEt.setTextColor(Color.BLACK);
         } else {
@@ -166,6 +157,8 @@ public class SmsAuthFragment extends BaseFragment {
         if (requestCode == READ_PHONE_STATE_PERM_RC) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 retrievePhoneNumber();
+            } else {
+                Log.d(TAG, "phone permissions denied");
             }
         }
     }
