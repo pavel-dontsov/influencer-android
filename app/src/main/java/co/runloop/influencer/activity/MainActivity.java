@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentManager;
 
 import co.runloop.influencer.R;
 import co.runloop.influencer.fragment.ContactsFragment;
+import co.runloop.influencer.fragment.SmsAuthFragment;
 
 public class MainActivity extends BaseActivity {
 
@@ -16,7 +17,7 @@ public class MainActivity extends BaseActivity {
         FragmentManager fm = getSupportFragmentManager();
         Fragment fragment = fm.findFragmentById(R.id.act_main_frag_container);
         if (fragment == null) {
-            fragment = ContactsFragment.newInstance();
+            fragment = SmsAuthFragment.newInstance();
             fm.beginTransaction()
                     .add(R.id.act_main_frag_container, fragment)
                     .commitAllowingStateLoss();
